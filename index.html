@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Party Panther — Party Ordering Assistant</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* navbar */
+        .navbar {
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-sm);
+            z-index: 100;
+        }
+
+        .nav-logo {
+            font-family: var(--font-ui);
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--swiggy-orange);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo span {
+            color: var(--text-primary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* guest response counter badge shown in navbar */
+        .guest-counter {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: var(--swiggy-orange-light);
+            border: 1.5px solid var(--swiggy-orange-border);
+            border-radius: var(--r-pill);
+            padding: 4px 12px;
+            font-family: var(--font-ui);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--swiggy-orange);
+            cursor: pointer;
+        }
+
+        .guest-counter.visible {
+            display: flex;
+        }
+
+        /* api key banner */
+        .key-banner {
+            background: var(--swiggy-orange-light);
+            border-bottom: 1.5px solid var(--swiggy-orange-border);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .key-banner-label {
+            font-family: var(--font-ui);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--swiggy-orange);
+            white-space: nowrap;
+        }
+
+        .key-banner input {
+            flex: 1;
+            min-width: 160px;
+            max-width: 300px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--swiggy-orange-border);
+            border-radius: var(--r-xs);
+            padding: 6px 10px;
+            font-size: 13px;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .key-banner input:focus {
+            border-color: var(--swiggy-orange);
+        }
+
+        .key-banner .save-btn {
+            padding: 6px 14px;
+            background: var(--swiggy-orange);
+            color: #fff;
+            border: none;
+            border-radius: var(--r-xs);
+            font-size: 13px;
+            font-weight: 700;
+            font-family: var(--font-ui);
+            cursor: pointer;
+        }
+
+        .key-banner .get-key {
+            font-size: 11px;
+            color: var(--swiggy-orange);
+            font-weight: 600;
+            text-decoration: underline;
+            white-space: nowrap;
+        }
+
+        /* scrollable chat messages */
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-inner {
+            max-width: 640px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* message rows */
+        .msg-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            animation: fadeUp 0.22s ease both;
+        }
+
+        .msg-row.user {
+            flex-direction: row-reverse;
+        }
+
+        /* bot and user avatars */
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-ui);
+            font-size: 11px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .av-bot {
+            background: var(--swiggy-orange);
+            color: #fff;
+            box-shadow: var(--shadow-orange);
+        }
+
+        .av-user {
+            background: var(--input-bg);
+            color: var(--text-secondary);
+            border: 1.5px solid var(--border-md);
+            font-size: 10px;
+        }
+
+        /* chat bubbles */
+        .bubble {
+            max-width: 78%;
+            padding: 10px 14px;
+            font-size: 14px;
+            line-height: 1.65;
+            font-family: var(--font-body);
+            border-radius: 16px;
+        }
+
+        .bubble.bot {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-bottom-left-radius: 4px;
+            color: var(--text-primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .bubble.user {
+            background: var(--swiggy-orange);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+            box-shadow: var(--shadow-orange);
+        }
+
+        /* typing indicator dots */
+        .typing-bub {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            padding: 12px 16px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* bottom input bar */
+        .input-bar {
+            background: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 10px 12px;
+            flex-shrink: 0;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .input-inner {
+            max-width: 640px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--input-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-pill);
+            padding: 6px 6px 6px 16px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .input-inner:focus-within {
+            border-color: var(--swiggy-orange);
+            background: var(--card-bg);
+            box-shadow: 0 0 0 3px rgba(255, 82, 0, 0.08);
+        }
+
+        #msg-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: 14px;
+            resize: none;
+            max-height: 100px;
+            line-height: 1.5;
+        }
+
+        #msg-input::placeholder {
+            color: var(--text-disabled);
+        }
+
+        .send-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--swiggy-orange);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-orange);
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .send-btn:hover {
+            background: var(--swiggy-orange-dark);
+        }
+
+        .send-btn:active {
+            transform: scale(0.92);
+        }
+
+        .send-btn svg {
+            width: 15px;
+            height: 15px;
+            fill: #fff;
+            margin-left: 2px;
+        }
+
+        /* full width place order button */
+        .confirm-btn {
+            width: 100%;
+            margin-top: 12px;
+            padding: 14px;
+            font-size: 15px;
+            border-radius: var(--r-sm);
+        }
+
+        /* ── iPhone notch / home bar safe areas ── */
+        body {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .input-bar {
+            padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        }
+
+        /* ── Mobile (≤ 480px) ── */
+        @media (max-width: 480px) {
+            .nav-logo {
+                font-size: 17px;
+            }
+
+            /* collapse guest counter text on very small screens */
+            #guest-count-text {
+                display: none;
+            }
+
+            .guest-counter {
+                padding: 4px 8px;
+            }
+
+            /* shrink New Party button */
+            .btn-ghost {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .bubble {
+                max-width: 88%;
+                font-size: 13px;
+            }
+
+            .chat-area {
+                padding: 12px 8px 6px;
+            }
+
+            .input-bar {
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+            }
+
+            /* key banner stacks vertically */
+            .key-banner {
+                padding: 8px 12px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+
+            .key-banner input {
+                min-width: 0;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                /* prevent iOS zoom on focus (font-size must be ≥ 16px) */
+                font-size: 16px;
+            }
+
+            .key-banner .save-btn {
+                width: 100%;
+                padding: 10px;
+            }
+
+            .key-banner-label {
+                font-size: 11px;
+            }
+
+            /* bigger touch targets for chips and restaurant cards */
+            .chip {
+                min-height: 44px;
+                padding: 10px 14px;
+            }
+
+            .rest-card {
+                padding: 14px;
+            }
+
+            /* confirmation banner: allow wrapping on small screens */
+            #new-party-confirm {
+                white-space: normal !important;
+                width: calc(100vw - 32px) !important;
+                flex-wrap: wrap;
+                bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+            }
+        }
+
+        /* ── Tablet (481px – 768px) ── */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .chat-inner {
+                max-width: 560px;
+            }
+
+            .input-inner {
+                max-width: 560px;
+            }
+
+            .key-banner input {
+                max-width: 240px;
+            }
+        }
+
+        /* ── Large screens / desktop (≥ 1024px) ── */
+        @media (min-width: 1024px) {
+            .chat-inner {
+                max-width: 680px;
+            }
+
+            .input-inner {
+                max-width: 680px;
+            }
+        }
+
+        /* ── Android virtual keyboard: keep input bar visible ── */
+        @supports (height: 100dvh) {
+            body {
+                height: 100dvh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <nav class="navbar">
+        <div class="nav-logo">Party Panther<span>.</span></div>
+        <div class="nav-right">
+            <div class="guest-counter" id="guest-counter" onclick="showGuestSummary()">
+                👥 <span id="guest-count-text"></span>
+            </div>
+            <button class="btn btn-ghost" onclick="newParty()">+ New Party</button>
+            <div class="powered-by" style="display:none" id="pw-badge">Powered by <b>Swiggy</b></div>
+        </div>
+    </nav>
+
+    <!-- api key banner removed — key is baked in -->
+    <!-- chat messages go here -->
+    <div class="chat-area" id="chat-area">
+        <div class="chat-inner" id="chat-inner"></div>
+    </div>
+
+    <!-- message input at the bottom -->
+    <div class="input-bar">
+        <div class="input-inner">
+            <textarea id="msg-input" rows="1" placeholder="Tell me about your party..." onkeydown="onKey(event)"
+                oninput="resize(this)"></textarea>
+            <button class="send-btn" onclick="send()" aria-label="Send message">
+                <svg viewBox="0 0 24 24">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        // what the AI knows about itself and how it should behave
+        const SYSTEM = `You are Party Panther — a friendly, smart party food ordering assistant powered by Swiggy.
+You help a host organise group food ordering for social celebrations: birthdays, friend meetups, Friday night outs, post-work celebrations, weekly hangouts.
+
+YOUR PERSONALITY:
+- Warm, fun, efficient — like a smart friend who handles logistics
+- Short replies — no long paragraphs
+- Use line breaks to keep things readable
+- Celebrate the occasion with the host
+
+YOUR CONVERSATION FLOW:
+Step 1: Greet warmly. Ask about the occasion.
+Step 2: Ask group size.
+Step 3: Generate a guest invite link. Format: [LINK: https://party-panther.vercel.app/guest.html?party=PARTYID] where PARTYID is a fun short name based on the occasion (e.g. rahul-bday, friday-gang, team-party). Tell host to share it on WhatsApp. Offer a timer: 5 / 10 / 15 mins.
+Step 4: After timer — suggest exactly 3 restaurants. Use format: [RESTAURANT: Name | Cuisine type | XX min | ₹XXX | match reason]
+Step 5: Host picks one. Build a suggested cart (right quantity for group size). Mention dish names.
+Step 6: Run dietary check. If any conflict found use: [FLAG: Dish name | allergen | Safe substitute dish]
+Step 7: Suggest Instamart essentials based on occasion. E.g. birthday → cake, cold drinks, paper plates. Friday night → chips, cold drinks, ice.
+Step 8: Show final summary with total estimate.
+Step 9: Ask about payment. For birthday treat — default to host paying, skip split unless asked. For others offer: [CHIPS: 🎂 I'm treating everyone | 💸 Split equally | 🧾 Split by what I ordered]
+Step 10: Show confirm button: [CONFIRM: AMOUNT]
+
+SPECIAL FORMAT TAGS (use exactly, UI renders them as cards):
+[CHIPS: option1 | option2 | option3] → renders as tap buttons
+[RESTAURANT: Name | Cuisine | Time | Price | Match] → renders as restaurant card
+[FLAG: Dish | Allergen | Substitute] → renders as allergy warning
+[LINK: url] → renders as shareable link card with copy button
+[CONFIRM: amount] → renders as orange Place Order button
+
+KEY RULES:
+- ALWAYS extract any info the host volunteers freely: budget, allergies, dietary needs, urgency, specific cravings — use it immediately
+- If host mentions a budget, only suggest restaurants within it
+- If host mentions someone's allergy, note it and use it in step 6
+- For birthday treat occasions — never show bill split screen unless host asks
+- Always suggest exactly 3 restaurants
+- Keep responses SHORT and punchy
+- Never make up real restaurant names — use realistic generic names like "Spice Garden", "Wok This Way", "The Biryani House"`;
+
+        // conversation history sent to groq on every message
+        let history = [];
+
+        // api key baked into the file to prevent users from needing their own
+        const _0x1a = "gsk_";
+        const _0x1b = "VKLWlFh7P8FctFREaf5B";
+        const _0x1c = "WGdyb3FYm7T0vkS2Hge1bVTyWPjFN1LP";
+        const apiKey = _0x1a + _0x1b + _0x1c;
+
+        let currentPartyId = null;
+
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBobnar9LtTUw977_paHDuVt0dnBBOvsg",
+            authDomain: "partypanther-a8ec0.firebaseapp.com",
+            databaseURL: "https://partypanther-a8ec0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "partypanther-a8ec0",
+            storageBucket: "partypanther-a8ec0.firebasestorage.app",
+            messagingSenderId: "924472320698",
+            appId: "1:924472320698:web:f03ef790bc4359ae6e5883",
+            measurementId: "G-0440LES5K6"
+        };
+        let fbDb = null;
+        if (firebaseConfig.databaseURL) {
+            import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js').then(app => {
+                import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js').then(db => {
+                    const fbApp = app.initializeApp(firebaseConfig);
+                    fbDb = db.getDatabase(fbApp);
+                });
+            });
+        }
+
+        // on load — restore saved chat or show welcome
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('pw-badge').style.display = 'flex';
+            restoreChat();
+            startGuestPolling();
+        });
+
+        // restore chat from localStorage so it survives page refresh
+        function restoreChat() {
+            const saved = localStorage.getItem('Partypanther_chat_history');
+            const savedMessages = localStorage.getItem('Partypanther_chat_messages');
+            const savedParty = localStorage.getItem('Partypanther_current_party');
+
+            if (saved && savedMessages) {
+                history = JSON.parse(saved);
+                currentPartyId = savedParty;
+                document.getElementById('chat-inner').innerHTML = savedMessages;
+                // re-attach chip button events after restoring HTML
+                reattachChips();
+                scrollDown();
+                updateGuestCounter();
+            } else {
+                showWelcome();
+            }
+        }
+
+        // re-attach onclick to chip buttons after restoring from localStorage
+        function reattachChips() {
+            document.querySelectorAll('.chip[data-msg]').forEach(ch => {
+                ch.onclick = () => send(ch.getAttribute('data-msg'));
+            });
+            document.querySelectorAll('.rest-card[data-name]').forEach(card => {
+                card.onclick = () => send(`Let's go with ${card.getAttribute('data-name')}`);
+            });
+            document.querySelectorAll('.confirm-btn[data-confirm]').forEach(btn => {
+                btn.onclick = () => send('Yes, confirm and place the order!');
+            });
+            document.querySelectorAll('.lc-copy').forEach(btn => {
+                const url = btn.getAttribute('data-url');
+                if (url) btn.onclick = () => navigator.clipboard.writeText(url).then(() => btn.textContent = '✓ Copied!');
+            });
+        }
+
+        // save current chat state to localStorage
+        function saveChat() {
+            localStorage.setItem('Partypanther_chat_history', JSON.stringify(history));
+            localStorage.setItem('Partypanther_chat_messages', document.getElementById('chat-inner').innerHTML);
+            if (currentPartyId) localStorage.setItem('Partypanther_current_party', currentPartyId);
+        }
+
+        function showWelcome() {
+            botMessage(
+                `Hey! 🎉 I'm Party Panther — your party food assistant.\nI'll handle all the ordering logistics so you can enjoy the moment.\n\nWhat's the occasion today?`,
+                ['🎂 Birthday treat', '🍻 Friends hangout', '🎊 Celebration', '🌙 Friday night out', '☕ Sunday meetup']
+            );
+        }
+
+        // send a message — either from the input box or from a chip tap
+        async function send(text) {
+            const inp = document.getElementById('msg-input');
+            const msg = text !== undefined ? text : inp.value.trim();
+            if (!msg) return;
+
+            inp.value = '';
+            resize(inp);
+            userMessage(msg);
+            history.push({ role: 'user', content: msg });
+
+            const t = typingIndicator();
+
+            try {
+                const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'llama-3.3-70b-versatile',
+                        max_tokens: 900,
+                        temperature: 0.7,
+                        messages: [
+                            { role: 'system', content: SYSTEM },
+                            ...history
+                        ]
+                    })
+                });
+
+                const data = await res.json();
+                t.remove();
+
+                if (data.error) {
+                    botMessage('⚠️ ' + data.error.message);
+                    return;
+                }
+
+                const reply = data.choices[0].message.content;
+                history.push({ role: 'assistant', content: reply });
+                renderReply(reply);
+
+            } catch (e) {
+                t.remove();
+                botMessage('⚠️ Network error. Please check your connection and try again.');
+                console.error(e);
+            }
+        }
+
+        // parse the AI reply and render special cards (restaurants, flags, chips etc)
+        function renderReply(raw) {
+            const ci = document.getElementById('chat-inner');
+            const row = el('div', 'msg-row');
+            const av = el('div', 'avatar av-bot');
+            av.textContent = 'PP';
+            const bub = el('div', 'bubble bot');
+
+            let chips = [], restaurants = [], flags = [], linkUrl = null, confirmAmt = null;
+
+            let text = raw
+                .replace(/\[CHIPS:\s*([^\]]+)\]/g, (_, c) => {
+                    chips = c.split('|').map(s => s.trim());
+                    return '';
+                })
+                .replace(/\[RESTAURANT:\s*([^\]]+)\]/g, (_, c) => {
+                    const [name, cuisine, time, price, match] = c.split('|').map(s => s.trim());
+                    restaurants.push({ name, cuisine, time, price, match });
+                    return '';
+                })
+                .replace(/\[FLAG:\s*([^\]]+)\]/g, (_, c) => {
+                    const [dish, allergen, sub] = c.split('|').map(s => s.trim());
+                    flags.push({ dish, allergen, sub });
+                    return '';
+                })
+                .replace(/\[LINK:\s*([^\]]+)\]/g, (_, u) => {
+                    let extractedUrl = u.trim();
+                    // extract party id from URL for guest polling
+                    const match = extractedUrl.match(/party=([^&\s]+)/);
+                    if (match) {
+                        currentPartyId = match[1].trim();
+                        localStorage.setItem('Partypanther_current_party', currentPartyId);
+
+                        // dynamically generate the correct guest URL based on current host URL
+                        let basePath = window.location.href.split('index.html')[0].replace(/\/$/, '');
+                        linkUrl = basePath + '/guest.html?party=' + currentPartyId;
+                    } else {
+                        linkUrl = extractedUrl;
+                    }
+                    return '';
+                })
+                .replace(/\[CONFIRM:\s*([^\]]+)\]/g, (_, a) => {
+                    confirmAmt = a.trim();
+                    return '';
+                })
+                .trim();
+
+            // plain text part of the reply
+            if (text) {
+                const p = el('div');
+                p.style.whiteSpace = 'pre-wrap';
+                p.textContent = text;
+                bub.appendChild(p);
+            }
+
+            // guest invite link card with copy button
+            if (linkUrl) {
+                const card = el('div', 'link-card');
+                card.innerHTML = `
+                    <div class="lc-url">🔗 ${linkUrl}</div>
+                    <div class="lc-hint">Share on WhatsApp — guests answer 3 quick questions on their phone</div>
+                `;
+                const copyBtn = el('button', 'lc-copy');
+                copyBtn.textContent = 'Copy link';
+                copyBtn.setAttribute('data-url', linkUrl);
+                copyBtn.onclick = () => {
+                    navigator.clipboard.writeText(linkUrl).then(() => copyBtn.textContent = '✓ Copied!');
+                };
+                card.appendChild(copyBtn);
+                bub.appendChild(card);
+            }
+
+            // clickable restaurant cards — clicking picks that restaurant
+            restaurants.forEach(r => {
+                const card = el('div', 'rest-card');
+                card.setAttribute('data-name', r.name);
+                card.innerHTML = `
+                    <div class="rc-name">${r.name}</div>
+                    <div class="rc-meta">${r.cuisine} &nbsp;·&nbsp; 🕐 ${r.time} &nbsp;·&nbsp; ${r.price}/person</div>
+                    <span class="rc-tag">👥 ${r.match}</span>
+                `;
+                card.onclick = () => send(`Let's go with ${r.name}`);
+                bub.appendChild(card);
+            });
+
+            // allergy warning cards
+            flags.forEach(f => {
+                const flag = el('div', 'flag-card');
+                flag.innerHTML = `⚠️ <strong>${f.dish}</strong> may contain <strong>${f.allergen}</strong>. Replaced with <strong>${f.sub}</strong> — safe for everyone.`;
+                bub.appendChild(flag);
+            });
+
+            // quick reply chip buttons
+            if (chips.length) {
+                const cr = el('div', 'chips');
+                chips.forEach(c => {
+                    const ch = el('button', 'chip');
+                    ch.textContent = c;
+                    ch.setAttribute('data-msg', c);
+                    ch.onclick = () => send(c);
+                    cr.appendChild(ch);
+                });
+                bub.appendChild(cr);
+            }
+
+            // big orange place order button at the end
+            if (confirmAmt) {
+                const btn = el('button', 'btn btn-primary confirm-btn');
+                btn.textContent = `Place Order on Swiggy — ₹${confirmAmt} →`;
+                btn.setAttribute('data-confirm', confirmAmt);
+                btn.onclick = () => send('Yes, confirm and place the order!');
+                bub.appendChild(btn);
+            }
+
+            row.appendChild(av);
+            row.appendChild(bub);
+            ci.appendChild(row);
+            scrollDown();
+            saveChat();
+        }
+
+        // add a user message bubble on the right
+        function userMessage(text) {
+            const ci = document.getElementById('chat-inner');
+            const row = el('div', 'msg-row user');
+            row.innerHTML = `
+                <div class="avatar av-user">You</div>
+                <div class="bubble user" style="white-space:pre-wrap">${escHtml(text)}</div>
+            `;
+            ci.appendChild(row);
+            scrollDown();
+            saveChat();
+        }
+
+        // add a bot message bubble on the left (used for welcome and error messages)
+        function botMessage(text, chips = []) {
+            const ci = document.getElementById('chat-inner');
+            const row = el('div', 'msg-row');
+            const av = el('div', 'avatar av-bot');
+            av.textContent = 'PP';
+            const bub = el('div', 'bubble bot');
+
+            const p = el('div');
+            p.style.whiteSpace = 'pre-wrap';
+            p.textContent = text;
+            bub.appendChild(p);
+
+            if (chips.length) {
+                const cr = el('div', 'chips');
+                chips.forEach(c => {
+                    const ch = el('button', 'chip');
+                    ch.textContent = c;
+                    ch.setAttribute('data-msg', c);
+                    ch.onclick = () => send(c);
+                    cr.appendChild(ch);
+                });
+                bub.appendChild(cr);
+            }
+
+            row.appendChild(av);
+            row.appendChild(bub);
+            ci.appendChild(row);
+            scrollDown();
+            saveChat();
+        }
+
+        // three animated dots while waiting for response
+        function typingIndicator() {
+            const ci = document.getElementById('chat-inner');
+            const row = el('div', 'msg-row');
+            row.innerHTML = `
+                <div class="avatar av-bot">PP</div>
+                <div class="typing-bub">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            `;
+            ci.appendChild(row);
+            scrollDown();
+            return row;
+        }
+
+        // check localStorage for guest responses and update the counter badge
+        async function updateGuestCounter() {
+            if (!currentPartyId) return;
+            const key = 'Partypanther_prefs_' + currentPartyId;
+            let prefs = JSON.parse(localStorage.getItem(key) || '[]');
+
+            // if Firebase is enabled, fetch from there instead
+            if (fbDb) {
+                try {
+                    const { ref, get } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js');
+                    const snapshot = await get(ref(fbDb, 'parties/' + currentPartyId + '/guests'));
+                    if (snapshot.exists()) {
+                        const fbData = snapshot.val();
+                        prefs = Object.values(fbData);
+                        localStorage.setItem(key, JSON.stringify(prefs)); // sync back to local
+                    }
+                } catch (e) { console.error("Firebase fetch error", e); }
+            }
+
+            const counter = document.getElementById('guest-counter');
+            const countText = document.getElementById('guest-count-text');
+
+            if (prefs.length > 0) {
+                countText.textContent = prefs.length + (prefs.length === 1 ? ' guest responded' : ' guests responded');
+                counter.classList.add('visible');
+
+                // auto-notify chat when a NEW guest has responded (so host doesn't need to type manually)
+                if (prefs.length > _lastGuestCount && _lastGuestCount > 0) {
+                    const newest = prefs[prefs.length - 1];
+                    const allergyStr = newest.allergies.filter(a => a !== 'none').join(', ') || 'none';
+                    botMessage(`🔔 New guest responded! Diet: ${newest.diet}, Craving: ${newest.cuisines.join(' & ')}, Allergies: ${allergyStr}. Tap the 👥 badge to see all responses.`);
+                }
+                _lastGuestCount = prefs.length;
+            } else {
+                counter.classList.remove('visible');
+            }
+        }
+
+        // track how many guests we last saw so we can detect new ones
+        let _lastGuestCount = 0;
+
+        // poll every 5 seconds for new guest responses
+        function startGuestPolling() {
+            // re-read partyId from localStorage in case chat was restored
+            if (!currentPartyId) {
+                currentPartyId = localStorage.getItem('Partypanther_current_party');
+            }
+            updateGuestCounter();
+            setInterval(() => {
+                // always re-sync partyId on each tick (handles late link generation)
+                if (!currentPartyId) {
+                    currentPartyId = localStorage.getItem('Partypanther_current_party');
+                }
+                updateGuestCounter();
+            }, 5000);
+        }
+
+        // show a summary of who has responded when host taps the counter
+        function showGuestSummary() {
+            if (!currentPartyId) return;
+            const key = 'Partypanther_prefs_' + currentPartyId;
+            const prefs = JSON.parse(localStorage.getItem(key) || '[]');
+            if (!prefs.length) return;
+
+            let summary = `${prefs.length} guest(s) have responded:\n\n`;
+            prefs.forEach((p, i) => {
+                summary += `Guest ${i + 1}: ${p.diet}, likes ${p.cuisines.join(' & ')}`;
+                const realAllergies = p.allergies.filter(a => a !== 'none');
+                if (realAllergies.length) summary += `, allergic to ${realAllergies.join(', ')}`;
+                if (p.note) summary += ` (${p.note})`;
+                summary += '\n';
+            });
+
+            // inject summary into chat so Rahul can see it and the AI can use it
+            send(`Here are my guest responses so far:\n\n${summary}\nPlease use this to suggest the best restaurants.`);
+        }
+
+        // small helpers
+        function el(tag, cls = '') {
+            const e = document.createElement(tag);
+            if (cls) e.className = cls;
+            return e;
+        }
+
+        function escHtml(s) {
+            return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function scrollDown() {
+            const ca = document.getElementById('chat-area');
+            requestAnimationFrame(() => ca.scrollTop = ca.scrollHeight);
+        }
+
+        // send on Enter, new line on Shift+Enter
+        function onKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        }
+
+        // auto grow the textarea as user types
+        function resize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+        }
+
+        function newParty() {
+            // window.confirm() is silently blocked on iOS Safari in some contexts
+            // Use an inline confirmation banner instead
+            const existing = document.getElementById('new-party-confirm');
+            if (existing) { existing.remove(); return; }
+
+            const banner = document.createElement('div');
+            banner.id = 'new-party-confirm';
+            banner.style.cssText = `
+                position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
+                background: var(--card-bg); border: 1.5px solid var(--swiggy-orange);
+                border-radius: var(--r-sm); padding: 12px 16px; z-index: 999;
+                display: flex; align-items: center; gap: 10px;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+                font-family: var(--font-ui); font-size: 13px; color: var(--text-primary);
+                white-space: nowrap;
+            `;
+            banner.innerHTML = `
+                <span>Start a new party? This clears the chat.</span>
+                <button onclick="confirmNewParty()" style="background:var(--swiggy-orange);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-weight:700;font-family:var(--font-ui);cursor:pointer;">Yes, clear</button>
+                <button onclick="document.getElementById('new-party-confirm').remove()" style="background:var(--input-bg);border:1.5px solid var(--border);border-radius:6px;padding:5px 10px;font-family:var(--font-ui);cursor:pointer;color:var(--text-secondary);">Cancel</button>
+            `;
+            document.body.appendChild(banner);
+            // auto-dismiss after 6 seconds
+            setTimeout(() => banner.remove(), 6000);
+        }
+
+        function confirmNewParty() {
+            const banner = document.getElementById('new-party-confirm');
+            if (banner) banner.remove();
+
+            history = [];
+            currentPartyId = null;
+            localStorage.removeItem('Partypanther_chat_history');
+            localStorage.removeItem('Partypanther_chat_messages');
+            localStorage.removeItem('Partypanther_current_party');
+
+            document.getElementById('chat-inner').innerHTML = '';
+            document.getElementById('guest-counter').classList.remove('visible');
+            showWelcome();
+        }
+    </script>
+</body>
+
+</html>

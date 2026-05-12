@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Party Panther — What are you feeling?</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--page-bg);
+            padding-bottom: 40px;
+        }
+
+        /* top bar */
+        .navbar {
+            width: 100%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 0 20px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 28px;
+            flex-shrink: 0;
+        }
+
+        .nav-logo {
+            font-family: var(--font-ui);
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--swiggy-orange);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-logo span {
+            color: var(--text-primary);
+        }
+
+        /* main content wrapper */
+        .content {
+            width: 100%;
+            max-width: 460px;
+            padding: 0 20px;
+        }
+
+        /* shows the party name from the URL */
+        .party-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--swiggy-orange-light);
+            border: 1.5px solid var(--swiggy-orange-border);
+            border-radius: var(--r-pill);
+            padding: 6px 16px;
+            font-family: var(--font-ui);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--swiggy-orange);
+            margin-bottom: 18px;
+        }
+
+        .page-title {
+            font-family: var(--font-ui);
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            line-height: 1.25;
+        }
+
+        .page-sub {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.55;
+        }
+
+        /* 3 step progress bar */
+        .progress {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .prog-step {
+            flex: 1;
+            height: 4px;
+            border-radius: 4px;
+            background: var(--border);
+            transition: background 0.3s ease;
+        }
+
+        .prog-step.done {
+            background: var(--swiggy-orange);
+        }
+
+        .prog-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-tertiary);
+            margin-bottom: 24px;
+            font-family: var(--font-ui);
+        }
+
+        /* each question section */
+        .q-block {
+            margin-bottom: 26px;
+        }
+
+        .q-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-ui);
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+        }
+
+        /* numbered circle next to each question */
+        .q-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--swiggy-orange);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-family: var(--font-ui);
+            box-shadow: var(--shadow-orange);
+        }
+
+        /* 2 column grid of big tap cards */
+        .tap-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .tap-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 16px 10px 14px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s ease;
+            box-shadow: var(--shadow-xs);
+            user-select: none;
+        }
+
+        .tap-card:hover {
+            border-color: var(--swiggy-orange);
+            background: var(--swiggy-orange-light);
+        }
+
+        .tap-card.active {
+            border-color: var(--swiggy-orange);
+            background: var(--swiggy-orange-light);
+        }
+
+        .tap-card .tc-emoji {
+            font-size: 26px;
+            display: block;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .tap-card .tc-label {
+            font-family: var(--font-ui);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .tap-card.active .tc-label {
+            color: var(--swiggy-orange);
+        }
+
+        /* free text field for extra allergy notes */
+        .extra-input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1.5px solid var(--border);
+            border-radius: var(--r-sm);
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s;
+            margin-top: 12px;
+            box-shadow: var(--shadow-xs);
+        }
+
+        .extra-input:focus {
+            border-color: var(--swiggy-orange);
+        }
+
+        .extra-input::placeholder {
+            color: var(--text-disabled);
+        }
+
+        .submit-area {
+            margin-top: 8px;
+        }
+
+        .submit-area .btn-primary {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: var(--r-sm);
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 11px;
+            color: var(--text-tertiary);
+        }
+
+        /* shown after guest submits their preferences */
+        .done-screen {
+            display: none;
+            text-align: center;
+            padding: 48px 20px;
+            animation: fadeUp 0.35s ease both;
+        }
+
+        .done-emoji {
+            font-size: 68px;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .done-title {
+            font-family: var(--font-ui);
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .done-sub {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        .done-badge {
+            display: inline-block;
+            background: var(--swiggy-orange-light);
+            border: 1.5px solid var(--swiggy-orange-border);
+            border-radius: var(--r-pill);
+            padding: 8px 22px;
+            font-family: var(--font-ui);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--swiggy-orange);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- navbar -->
+    <nav class="navbar">
+        <div class="nav-logo">Party Panther<span>.</span></div>
+        <div class="powered-by">Powered by <b>Swiggy</b></div>
+    </nav>
+
+    <div class="content">
+
+        <!-- party name pulled from the URL -->
+        <div class="party-badge">🎊 <span id="party-name">Loading party...</span></div>
+
+        <div class="page-title">What are you feeling tonight?</div>
+        <div class="page-sub">3 quick taps — so we get the food exactly right for everyone.</div>
+
+        <!-- progress bar -->
+        <div class="progress">
+            <div class="prog-step" id="ps1"></div>
+            <div class="prog-step" id="ps2"></div>
+            <div class="prog-step" id="ps3"></div>
+        </div>
+        <div class="prog-label" id="prog-label">Step 1 of 3 — Diet type</div>
+
+        <!-- the 3 question form -->
+        <div id="form">
+
+            <!-- Q1: diet type -->
+            <div class="q-block">
+                <div class="q-title"><span class="q-num">1</span> What's your diet?</div>
+                <div class="tap-grid" id="diet-grid">
+                    <div class="tap-card" onclick="pickDiet(this,'veg')">
+                        <span class="tc-emoji">🥦</span>
+                        <span class="tc-label">Vegetarian</span>
+                    </div>
+                    <div class="tap-card" onclick="pickDiet(this,'non-veg')">
+                        <span class="tc-emoji">🍗</span>
+                        <span class="tc-label">Non-veg</span>
+                    </div>
+                    <div class="tap-card" onclick="pickDiet(this,'vegan')">
+                        <span class="tc-emoji">🌱</span>
+                        <span class="tc-label">Vegan</span>
+                    </div>
+                    <div class="tap-card" onclick="pickDiet(this,'jain')">
+                        <span class="tc-emoji">🙏</span>
+                        <span class="tc-label">Jain</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2: cuisine preference, max 2 picks -->
+            <div class="q-block">
+                <div class="q-title">
+                    <span class="q-num">2</span>
+                    What are you craving?
+                    <span style="font-size:12px;font-weight:500;color:var(--text-tertiary)">(pick up to 2)</span>
+                </div>
+                <div class="tap-grid" id="cuisine-grid">
+                    <div class="tap-card" onclick="pickCuisine(this,'north-indian')">
+                        <span class="tc-emoji">🍛</span>
+                        <span class="tc-label">North Indian</span>
+                    </div>
+                    <div class="tap-card" onclick="pickCuisine(this,'chinese')">
+                        <span class="tc-emoji">🥡</span>
+                        <span class="tc-label">Chinese</span>
+                    </div>
+                    <div class="tap-card" onclick="pickCuisine(this,'pizza')">
+                        <span class="tc-emoji">🍕</span>
+                        <span class="tc-label">Pizza</span>
+                    </div>
+                    <div class="tap-card" onclick="pickCuisine(this,'biryani')">
+                        <span class="tc-emoji">🍚</span>
+                        <span class="tc-label">Biryani</span>
+                    </div>
+                    <div class="tap-card" onclick="pickCuisine(this,'south-indian')">
+                        <span class="tc-emoji">🥘</span>
+                        <span class="tc-label">South Indian</span>
+                    </div>
+                    <div class="tap-card" onclick="pickCuisine(this,'anything')">
+                        <span class="tc-emoji">😋</span>
+                        <span class="tc-label">Surprise me!</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3: allergies — chips + free text -->
+            <div class="q-block">
+                <div class="q-title"><span class="q-num">3</span> Any allergies?</div>
+                <div class="chips" id="allergy-chips">
+                    <button class="chip active" onclick="toggleAllergy(this,'none')">✅ None</button>
+                    <button class="chip" onclick="toggleAllergy(this,'nuts')">🥜 Nuts</button>
+                    <button class="chip" onclick="toggleAllergy(this,'dairy')">🥛 Dairy</button>
+                    <button class="chip" onclick="toggleAllergy(this,'gluten')">🌾 Gluten</button>
+                    <button class="chip" onclick="toggleAllergy(this,'eggs')">🥚 Eggs</button>
+                    <button class="chip" onclick="toggleAllergy(this,'shellfish')">🦐 Shellfish</button>
+                </div>
+                <input class="extra-input" type="text" id="extra-note"
+                    placeholder="Anything else? e.g. diabetic, no mushrooms, lactose intolerant..." />
+            </div>
+
+            <!-- submit button -->
+            <div class="submit-area">
+                <button class="btn btn-primary" onclick="submitForm()">I'm ready to eat! 🍽️</button>
+            </div>
+            <div class="footer-note">Your preferences are only used for this party order.</div>
+
+        </div>
+
+        <!-- shown after form is submitted -->
+        <div class="done-screen" id="done">
+            <div class="done-emoji">🎉</div>
+            <div class="done-title">You're all set!</div>
+            <div class="done-sub">
+                Your food preferences have been saved.<br>
+                The host will handle the rest —<br>
+                get ready to eat!
+            </div>
+            <div class="done-badge">Powered by Swiggy 🧡</div>
+        </div>
+
+    </div>
+
+    <script>
+
+        // guest preference state
+        let diet = '';
+        let cuisines = [];
+        let allergies = ['none'];
+
+        // read party name from URL e.g. guest.html?party=rahul-bday
+        const params = new URLSearchParams(window.location.search);
+        const partyId = params.get('party') || 'party';
+        document.getElementById('party-name').textContent =
+            partyId.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+        // update the progress bar as guest fills each step
+        function updateProgress() {
+            const step = !diet ? 1 : cuisines.length === 0 ? 2 : 3;
+            ['ps1', 'ps2', 'ps3'].forEach((id, i) => {
+                document.getElementById(id).classList.toggle('done', i < step);
+            });
+            const labels = ['Step 1 of 3 — Diet type', 'Step 2 of 3 — Cuisine', 'Step 3 of 3 — Allergies'];
+            document.getElementById('prog-label').textContent = labels[step - 1];
+        }
+
+        // only one diet can be selected at a time
+        function pickDiet(el, val) {
+            document.querySelectorAll('#diet-grid .tap-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            diet = val;
+            updateProgress();
+        }
+
+        // up to 2 cuisines, picking "anything" clears other selections
+        function pickCuisine(el, val) {
+            if (val === 'anything') {
+                document.querySelectorAll('#cuisine-grid .tap-card').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                cuisines = ['anything'];
+                updateProgress();
+                return;
+            }
+
+            document.querySelectorAll('#cuisine-grid .tap-card').forEach(c => {
+                if (c.querySelector('.tc-label').textContent === 'Surprise me!') c.classList.remove('active');
+            });
+            cuisines = cuisines.filter(c => c !== 'anything');
+
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                cuisines = cuisines.filter(c => c !== val);
+            } else {
+                if (cuisines.length >= 2) {
+                    alert('Pick up to 2 cuisines only!');
+                    return;
+                }
+                el.classList.add('active');
+                cuisines.push(val);
+            }
+            updateProgress();
+        }
+
+        // toggle allergy chips, selecting None clears everything else
+        function toggleAllergy(el, val) {
+            if (val === 'none') {
+                document.querySelectorAll('#allergy-chips .chip').forEach(c => c.classList.remove('active'));
+                el.classList.add('active');
+                allergies = ['none'];
+                return;
+            }
+
+            document.querySelectorAll('#allergy-chips .chip').forEach(c => {
+                if (c.textContent.includes('None')) c.classList.remove('active');
+            });
+            allergies = allergies.filter(a => a !== 'none');
+
+            if (el.classList.contains('active')) {
+                el.classList.remove('active');
+                allergies = allergies.filter(a => a !== val);
+            } else {
+                el.classList.add('active');
+                allergies.push(val);
+            }
+
+            // if nothing selected, go back to None
+            if (allergies.length === 0) {
+                allergies = ['none'];
+                document.querySelectorAll('#allergy-chips .chip').forEach(c => {
+                    if (c.textContent.includes('None')) c.classList.add('active');
+                });
+            }
+        }
+
+        // --- FIREBASE SYNC (Optional for cross-device) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCBobnar9LtTUw977_paHDuVt0dnBBOvsg",
+            authDomain: "partypanther-a8ec0.firebaseapp.com",
+            databaseURL: "https://partypanther-a8ec0-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "partypanther-a8ec0",
+            storageBucket: "partypanther-a8ec0.firebasestorage.app",
+            messagingSenderId: "924472320698",
+            appId: "1:924472320698:web:f03ef790bc4359ae6e5883",
+            measurementId: "G-0440LES5K6"
+        };
+        let fbDb = null;
+        if (firebaseConfig.databaseURL) {
+            import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js').then(app => {
+                import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js').then(db => {
+                    const fbApp = app.initializeApp(firebaseConfig);
+                    fbDb = db.getDatabase(fbApp);
+                });
+            });
+        }
+
+        // save guest preferences to localStorage and Firebase (if configured)
+        async function submitForm() {
+            if (!diet) return alert('Please select your diet type!');
+            if (!cuisines.length) return alert('Please pick at least one cuisine!');
+
+            const prefs = {
+                guestId: 'g_' + Math.random().toString(36).substr(2, 8),
+                diet,
+                cuisines,
+                allergies,
+                note: document.getElementById('extra-note').value.trim(),
+                timestamp: Date.now()
+            };
+
+            // save under the party key so the host can read all guest prefs together
+            const key = 'Partypanther_prefs_' + partyId;
+            const existing = JSON.parse(localStorage.getItem(key) || '[]');
+            existing.push(prefs);
+            localStorage.setItem(key, JSON.stringify(existing));
+
+            // push to Firebase if enabled
+            if (fbDb) {
+                try {
+                    const { ref, push } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js');
+                    await push(ref(fbDb, 'parties/' + partyId + '/guests'), prefs);
+                } catch (e) { console.error("Firebase push error", e); }
+            }
+
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('done').style.display = 'block';
+        }
+
+        updateProgress();
+
+    </script>
+</body>
+
+</html>

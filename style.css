@@ -1,0 +1,356 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap');
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    /* Swiggy exact color palette */
+    --swiggy-orange: #FF5200;
+    --swiggy-orange-dark: #E04800;
+    --swiggy-orange-light: #FFF3EE;
+    --swiggy-orange-fade: #FFE8DC;
+    --swiggy-orange-border: #FFCAB5;
+
+    --page-bg: #F9F9F9;
+    --card-bg: #FFFFFF;
+    --input-bg: #F2F2F2;
+
+    --border: #E8E8E8;
+    --border-md: #D4D4D4;
+
+    /* Swiggy text colors */
+    --text-primary: #282C3F;
+    --text-secondary: #7E808C;
+    --text-tertiary: #ABACB4;
+    --text-disabled: #CCCCCC;
+
+    /* Swiggy status colors */
+    --veg-green: #26A541;
+    --nonveg-red: #E43B4F;
+
+    /* Shadows — Swiggy card style */
+    --shadow-xs: 0 1px 4px rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.07);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.10);
+    --shadow-lg: 0 8px 28px rgba(0, 0, 0, 0.13);
+    --shadow-orange: 0 4px 14px rgba(255, 82, 0, 0.28);
+
+    /* Border radius */
+    --r-xs: 6px;
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --r-pill: 100px;
+
+    /* Typography */
+    --font-ui: 'Nunito', sans-serif;
+    --font-body: 'Nunito Sans', sans-serif;
+}
+
+html,
+body {
+    height: 100%;
+    font-family: var(--font-body);
+    background: var(--page-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-md);
+    border-radius: 4px;
+}
+
+/* ── CHIP — Swiggy filter pill ── */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.chip {
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: var(--r-pill);
+    border: 1.5px solid var(--border-md);
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    box-shadow: var(--shadow-xs);
+    user-select: none;
+}
+
+.chip:hover {
+    border-color: var(--swiggy-orange);
+    color: var(--swiggy-orange);
+    background: var(--swiggy-orange-light);
+}
+
+.chip.active {
+    border-color: var(--swiggy-orange);
+    color: var(--swiggy-orange);
+    background: var(--swiggy-orange-light);
+}
+
+/* ── PRIMARY BUTTON — Swiggy CTA ── */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: var(--font-ui);
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    user-select: none;
+}
+
+.btn-primary {
+    background: var(--swiggy-orange);
+    color: #fff;
+    border-radius: var(--r-sm);
+    padding: 14px 28px;
+    font-size: 15px;
+    box-shadow: var(--shadow-orange);
+}
+
+.btn-primary:hover {
+    background: var(--swiggy-orange-dark);
+}
+
+.btn-primary:active {
+    transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-ghost {
+    background: var(--swiggy-orange-light);
+    color: var(--swiggy-orange);
+    border: 1.5px solid var(--swiggy-orange-border);
+    border-radius: var(--r-pill);
+    padding: 7px 18px;
+    font-size: 13px;
+}
+
+.btn-ghost:hover {
+    background: var(--swiggy-orange-fade);
+}
+
+/* ── RESTAURANT CARD ── */
+.rest-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow-sm);
+}
+
+.rest-card:hover {
+    border-color: var(--swiggy-orange);
+    box-shadow: var(--shadow-md);
+}
+
+.rest-card .rc-name {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.rest-card .rc-meta {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.rest-card .rc-tag {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    padding: 3px 10px;
+    border-radius: var(--r-pill);
+    background: var(--swiggy-orange-light);
+    color: var(--swiggy-orange);
+    border: 1px solid var(--swiggy-orange-border);
+}
+
+/* ── ALLERGY FLAG ── */
+.flag-card {
+    background: #FFFBF0;
+    border: 1.5px solid #FFD980;
+    border-radius: var(--r-sm);
+    padding: 12px 14px;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #7A5500;
+    line-height: 1.65;
+    font-weight: 500;
+}
+
+/* ── LINK CARD ── */
+.link-card {
+    background: var(--swiggy-orange-light);
+    border: 1.5px solid var(--swiggy-orange-border);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+    margin-top: 10px;
+}
+
+.link-card .lc-url {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--swiggy-orange);
+    word-break: break-all;
+}
+
+.link-card .lc-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+.link-card .lc-copy {
+    margin-top: 10px;
+    padding: 6px 16px;
+    background: var(--swiggy-orange);
+    color: #fff;
+    border: none;
+    border-radius: var(--r-pill);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: var(--font-ui);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.link-card .lc-copy:hover {
+    background: var(--swiggy-orange-dark);
+}
+
+/* ── SUMMARY CARD ── */
+.summary-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+    margin-top: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.summary-card .sc-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.summary-card .sc-row:last-child {
+    border-bottom: none;
+}
+
+.summary-card .sc-row.total {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    margin-top: 4px;
+}
+
+/* ── TYPING DOTS ── */
+.typing-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--swiggy-orange);
+    opacity: 0.25;
+    animation: tdot 1.3s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.18s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.36s;
+}
+
+@keyframes tdot {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ── POWERED BY ── */
+.powered-by {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+}
+
+.powered-by b {
+    color: var(--swiggy-orange);
+}
+
+/* ── Fade up animation ── */
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
